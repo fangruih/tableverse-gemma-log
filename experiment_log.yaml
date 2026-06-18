@@ -1,0 +1,194 @@
+title: TableVerse x Gemma 4
+subtitle: Cross-format table QA and hidden-state geometry experiments.
+current_experiment: "001"
+benchmark:
+  name: TABVERSE
+  full_name: "TABVERSE: Benchmarking Cross-Format Table Understanding in LLMs and VLMs"
+  default_open: false
+  source: https://arxiv.org/abs/2606.09578
+  summary: TABVERSE is a controlled multimodal table benchmark designed to isolate representation effects. The same table content is aligned across multiple structural formats and rendered images, so format can change while table semantics stay fixed.
+  why_relevant: This makes it a good fit for interpretability analysis because hidden-state differences can be compared across representations of the same underlying table rather than across different table contents.
+  tasks:
+    - name: Question Answering (QA)
+      description: Answer natural-language questions using the table. This is the task used in Experiments 000 and 001.
+      size: 700 question-table pairs in the QA test split used here.
+      metric: Exact-match accuracy in the benchmark; our runner also keeps predictions and activations for interpretability.
+    - name: Structural Understanding Capability (SUC)
+      description: Test table-structure understanding such as boundaries, rows, columns, headers, and cell access.
+      size: 629 unique-table structural understanding examples.
+      metric: Exact-match accuracy.
+    - name: Structure Reconstruction (SR)
+      description: Reconstruct or generate table structure from another representation.
+      size: Not run in this phase.
+      metric: Structural similarity metrics.
+  formats:
+    text:
+      - HTML
+      - Markdown
+      - LaTeX
+    image:
+      - rendered HTML table image
+      - rendered Markdown table image
+      - rendered LaTeX table image
+  metadata:
+    - question category
+    - question difficulty
+    - source dataset
+    - score
+  this_project_scope:
+    - Experiments 000 and 001 use only the QA split.
+    - Experiments 000 and 001 use only text formats, not rendered images.
+    - For each QA example, Gemma sees the same question and same table content while only the table representation changes.
+    - Hidden-state vectors are saved so that behavioral format sensitivity can be linked to internal representation geometry.
+cards:
+  - label: Model
+    value: Gemma 4 12B
+    note: google/gemma-4-12B-it
+  - label: Dataset
+    value: TableVerse QA
+    note: HTML / Markdown / LaTeX
+  - label: Cluster
+    value: HAIC H100
+    note: 80GB HBM3, BF16 enabled
+  - label: Next Run
+    value: "002"
+    note: Interpretability analysis
+experiments:
+  - id: "000"
+    name: Smoke QA Text Formats
+    status: completed
+    date: "2026-06-18"
+    default_open: false
+    purpose: Verify the end-to-end TableVerse QA pipeline with Gemma 4 12B on a tiny text-format subset, including prediction output and selected hidden-state activation saving.
+    settings:
+      Cluster: HAIC interactive GPU session
+      Node: haic-hgx-4
+      GPU: NVIDIA H100 80GB HBM3
+      Project root: /hai/scratch/fangruih/tableverse_gemma/structure_data
+      Conda env: /hai/scratch/fangruih/tableverse_gemma/conda_envs/tableverse-gemma
+      PyTorch: 2.6.0+cu124
+      Dataset: MBZUAI/TABVERSE
+      Dataset config: qa
+      Split: test
+      Model: google/gemma-4-12B-it
+      Prompt format: tokenizer chat template
+      Examples: "5"
+      Formats: html_code, markdown_code, latex_code
+      Total generations: "15"
+      Decoding: deterministic, do_sample=false, max_new_tokens=32
+      Activation policy: selected layers 0, 6, 13, 20, -1; final-token vector and mean-pooled vector
+    setup_notes:
+      - Persistent storage uses /hai/scratch/fangruih/tableverse_gemma, not home.
+      - /scratch/users/$USER was not writable.
+      - /tmp was rejected because the conda environment needs to persist.
+      - Initial torch 2.12.1+cu130 failed because the node driver supported CUDA 12.4. Fixed by installing CUDA 12.4 PyTorch wheels.
+      - Bare prompting produced degenerate Gemma output, so the runner uses tokenizer.apply_chat_template.
+    command: |-
+      python experiments/tableverse_gemma/scripts/run_qa.py \
+        --config experiments/tableverse_gemma/configs/smoke.yaml
+    outputs:
+      - experiments/tableverse_gemma/outputs/runs/smoke_text_5.jsonl
+      - experiments/tableverse_gemma/outputs/activations/smoke_text_5/
+    result_summary: Smoke test passed. The run produced 15 prediction rows, 0 runtime errors, and activation files for every example-format pair.
+    metrics:
+      Total rows: "15"
+      Runtime errors: "0"
+      HTML accuracy: "1.000"
+      Markdown accuracy: "1.000"
+      LaTeX accuracy: "1.000"
+    notes:
+      - Initial exact scorer reported 0 accuracy because TableVerse labels are list-valued.
+      - List-aware rescoring gives 15/15.
+      - For final reporting, use or adapt the official TableVerse evaluator.
+  - id: "001"
+    name: Full QA Text Benchmark
+    status: completed
+    date: "2026-06-18"
+    default_open: true
+    purpose: Run Gemma 4 12B on the full TableVerse QA text benchmark across HTML, Markdown, and LaTeX, while saving compact selected-layer hidden-state vectors for cross-format representation analysis.
+    settings:
+      Config: experiments/tableverse_gemma/configs/qa_full_text.yaml
+      Run ID: qa_full_text_700
+      Dataset: MBZUAI/TABVERSE
+      Dataset config: qa
+      Split: test
+      Examples: "700"
+      Formats: html_code, markdown_code, latex_code
+      Total generations: "2100"
+      Model: google/gemma-4-12B-it
+      Prompt format: tokenizer chat template
+      Decoding: deterministic, do_sample=false, max_new_tokens=32
+      Activation policy: selected layers 0, 6, 13, 20, -1; final-token vector and mean-pooled vector
+    command: |-
+      python experiments/tableverse_gemma/scripts/run_qa.py \
+        --config experiments/tableverse_gemma/configs/qa_full_text.yaml
+    post_run_command: |-
+      python experiments/tableverse_gemma/scripts/behavior_summary.py \
+        experiments/tableverse_gemma/outputs/runs/qa_full_text_700.jsonl \
+        --out experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_behavior.md
+    outputs:
+      - experiments/tableverse_gemma/outputs/runs/qa_full_text_700.jsonl
+      - experiments/tableverse_gemma/outputs/activations/qa_full_text_700/
+      - experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_behavior.md
+    result_summary: Full text QA benchmark completed in 20:49. The run produced 2100 JSONL rows for 700 examples x 3 formats. Accuracy is very similar across HTML, Markdown, and LaTeX, but 77 examples show at least one cross-format correct/incorrect disagreement. Activation files total 2097 because three rows had runtime errors and therefore did not save activations.
+    metrics:
+      Total rows: "2100"
+      Examples: "700"
+      Runtime: "20:49"
+      Runtime errors: "3"
+      HTML accuracy: "0.431"
+      HTML correct: "302 / 700"
+      Markdown accuracy: "0.430"
+      Markdown correct: "301 / 700"
+      LaTeX accuracy: "0.433"
+      LaTeX correct: "303 / 700"
+      Failure-flip examples: "77"
+      Activation files: "2097"
+      Activation directory size: "563M"
+      Avg HTML tokens: "1810.6"
+      Avg Markdown tokens: "933.9"
+      Avg LaTeX tokens: "861.6"
+    notes:
+      - PIL emitted a DecompressionBombWarning for a very large TableVerse image field, but this run used text fields only.
+      - HTML had 1 error, Markdown had 2 errors, and LaTeX had 0 errors.
+      - The 2097 activation files match 2100 rows minus 3 runtime-error rows.
+      - Similar aggregate accuracy across formats means the next analysis should focus on the 77 failure-flip examples and layer-wise representation geometry.
+      - Full token-level activations should be collected only for later diagnostic subsets.
+  - id: "002"
+    name: Interpretability Analysis For Full QA Text Benchmark
+    status: planned
+    date: "2026-06-18"
+    default_open: true
+    purpose: Analyze Experiment 001 hidden-state vectors to quantify cross-format representation shifts and test whether failure-flip examples have different layer-wise geometry from non-flip examples.
+    settings:
+      Input run: experiments/tableverse_gemma/outputs/runs/qa_full_text_700.jsonl
+      Input activations: experiments/tableverse_gemma/outputs/activations/qa_full_text_700/
+      Source experiment: "001"
+      Rows: "2100"
+      Activation files: "2097"
+      Format pairs: html-markdown, html-latex, markdown-latex
+      Saved vectors: selected-layer final-token and mean-pooled vectors
+      Primary behavioral subset: "77 failure-flip examples"
+    command: |-
+      python experiments/tableverse_gemma/scripts/analyze_geometry.py \
+        --run-jsonl experiments/tableverse_gemma/outputs/runs/qa_full_text_700.jsonl \
+        --activation-dir experiments/tableverse_gemma/outputs/activations/qa_full_text_700 \
+        --out-dir experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry
+    outputs:
+      - experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry/interpretability_analysis.md
+      - experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry/behavior_rows.csv
+      - experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry/geometry_rows.csv
+      - experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry/geometry_summary_by_layer.csv
+      - experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry/example_distance_summary.csv
+      - experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry/missing_activations.csv
+    result_summary: Pending.
+    metrics:
+      Mean cosine by layer: pending
+      Failure-flip mean cosine: pending
+      Non-flip mean cosine: pending
+      Flip vs non-flip geometry gap: pending
+      Highest-distance failure-flip examples: pending
+    notes:
+      - This analysis uses compact saved vectors, not full token-level hidden states.
+      - If flip and non-flip examples have similar aggregate cosine, inspect top-distance failure-flip cases qualitatively.
+      - Next deeper analysis can collect full token activations for a small failure-flip subset only.

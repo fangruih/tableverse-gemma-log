@@ -128,6 +128,36 @@ pre {
 <div class="card"><div class="label">Dataset</div><div class="metric">TableVerse QA</div><p><code>HTML / Markdown / LaTeX</code></p></div>
 <div class="card"><div class="label">Cluster</div><div class="metric">HAIC H100</div><p><code>80GB HBM3, BF16 enabled</code></p></div>
 <div class="card"><div class="label">Next Run</div><div class="metric">002</div><p><code>Interpretability analysis</code></p></div></section>
+  
+  <details>
+    <summary>
+      <span class="summary-title">
+        <span>Benchmark: TABVERSE</span>
+        <span class="pill">overview</span>
+      </span>
+    </summary>
+    <div class="body">
+      <p><strong>TABVERSE: Benchmarking Cross-Format Table Understanding in LLMs and VLMs</strong></p>
+      <p>TABVERSE is a controlled multimodal table benchmark designed to isolate representation effects. The same table content is aligned across multiple structural formats and rendered images, so format can change while table semantics stay fixed.</p>
+      <p>This makes it a good fit for interpretability analysis because hidden-state differences can be compared across representations of the same underlying table rather than across different table contents.</p>
+      <p>Source: <a href="https://arxiv.org/abs/2606.09578">https://arxiv.org/abs/2606.09578</a></p>
+      <h3>Tasks</h3>
+      <table>
+        <tr><th>Task</th><th>Description</th><th>Size</th><th>Metric</th></tr>
+        <tr><td>Question Answering (QA)</td><td>Answer natural-language questions using the table. This is the task used in Experiments 000 and 001.</td><td>700 question-table pairs in the QA test split used here.</td><td>Exact-match accuracy in the benchmark; our runner also keeps predictions and activations for interpretability.</td></tr><tr><td>Structural Understanding Capability (SUC)</td><td>Test table-structure understanding such as boundaries, rows, columns, headers, and cell access.</td><td>629 unique-table structural understanding examples.</td><td>Exact-match accuracy.</td></tr><tr><td>Structure Reconstruction (SR)</td><td>Reconstruct or generate table structure from another representation.</td><td>Not run in this phase.</td><td>Structural similarity metrics.</td></tr>
+      </table>
+      <h3>Formats</h3>
+      <table>
+        <tr><th>Group</th><th>Representations</th></tr>
+        <tr><td>text</td><td>HTML, Markdown, LaTeX</td></tr><tr><td>image</td><td>rendered HTML table image, rendered Markdown table image, rendered LaTeX table image</td></tr>
+      </table>
+      <h3>Metadata</h3>
+      <ul><li>question category</li><li>question difficulty</li><li>source dataset</li><li>score</li></ul>
+      <h3>This Project Scope</h3>
+      <ul><li>Experiments 000 and 001 use only the QA split.</li><li>Experiments 000 and 001 use only text formats, not rendered images.</li><li>For each QA example, Gemma sees the same question and same table content while only the table representation changes.</li><li>Hidden-state vectors are saved so that behavioral format sensitivity can be linked to internal representation geometry.</li></ul>
+    </div>
+  </details>
+
   <h2>Experiments</h2>
   <details>
 <summary>
