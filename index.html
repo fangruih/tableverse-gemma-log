@@ -127,7 +127,7 @@ pre {
   <section class="grid"><div class="card"><div class="label">Model</div><div class="metric">Gemma 4 12B</div><p><code>google/gemma-4-12B-it</code></p></div>
 <div class="card"><div class="label">Dataset</div><div class="metric">TableVerse QA</div><p><code>HTML / Markdown / LaTeX</code></p></div>
 <div class="card"><div class="label">Cluster</div><div class="metric">HAIC H100</div><p><code>80GB HBM3, BF16 enabled</code></p></div>
-<div class="card"><div class="label">Next Run</div><div class="metric">001</div><p><code>Full QA text benchmark</code></p></div></section>
+<div class="card"><div class="label">Next Run</div><div class="metric">002</div><p><code>Interpretability analysis</code></p></div></section>
   <h2>Experiments</h2>
   <details>
 <summary>
@@ -232,6 +232,50 @@ experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_behavior.md</pre>
 <p>Full text QA benchmark completed in 20:49. The run produced 2100 JSONL rows for 700 examples x 3 formats. Accuracy is very similar across HTML, Markdown, and LaTeX, but 77 examples show at least one cross-format correct/incorrect disagreement. Activation files total 2097 because three rows had runtime errors and therefore did not save activations.</p>
 <h3>Notes</h3>
 <ul><li>PIL emitted a DecompressionBombWarning for a very large TableVerse image field, but this run used text fields only.</li><li>HTML had 1 error, Markdown had 2 errors, and LaTeX had 0 errors.</li><li>The 2097 activation files match 2100 rows minus 3 runtime-error rows.</li><li>Similar aggregate accuracy across formats means the next analysis should focus on the 77 failure-flip examples and layer-wise representation geometry.</li><li>Full token-level activations should be collected only for later diagnostic subsets.</li></ul>
+</div>
+</details><details open>
+<summary>
+<span class="summary-title">
+<span>002 Interpretability Analysis For Full QA Text Benchmark</span>
+<span class="pill planned">planned</span>
+</span>
+</summary>
+<div class="body">
+<p>Purpose: Analyze Experiment 001 hidden-state vectors to quantify cross-format representation shifts and test whether failure-flip examples have different layer-wise geometry from non-flip examples.</p>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Input run</td><td><code>experiments/tableverse_gemma/outputs/runs/qa_full_text_700.jsonl</code></td></tr>
+<tr><td>Input activations</td><td><code>experiments/tableverse_gemma/outputs/activations/qa_full_text_700/</code></td></tr>
+<tr><td>Source experiment</td><td><code>001</code></td></tr>
+<tr><td>Rows</td><td><code>2100</code></td></tr>
+<tr><td>Activation files</td><td><code>2097</code></td></tr>
+<tr><td>Format pairs</td><td><code>html-markdown, html-latex, markdown-latex</code></td></tr>
+<tr><td>Saved vectors</td><td><code>selected-layer final-token and mean-pooled vectors</code></td></tr>
+<tr><td>Primary behavioral subset</td><td><code>77 failure-flip examples</code></td></tr>
+</table>
+<h3>Command</h3>
+<pre>python experiments/tableverse_gemma/scripts/analyze_geometry.py \
+  --run-jsonl experiments/tableverse_gemma/outputs/runs/qa_full_text_700.jsonl \
+  --activation-dir experiments/tableverse_gemma/outputs/activations/qa_full_text_700 \
+  --out-dir experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry</pre>
+<h3>Outputs</h3>
+<pre>experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry/interpretability_analysis.md
+experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry/behavior_rows.csv
+experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry/geometry_rows.csv
+experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry/geometry_summary_by_layer.csv
+experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry/example_distance_summary.csv
+experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_geometry/missing_activations.csv</pre>
+<h3>Metrics</h3>
+<table><tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Mean cosine by layer</td><td>pending</td></tr>
+<tr><td>Failure-flip mean cosine</td><td>pending</td></tr>
+<tr><td>Non-flip mean cosine</td><td>pending</td></tr>
+<tr><td>Flip vs non-flip geometry gap</td><td>pending</td></tr>
+<tr><td>Highest-distance failure-flip examples</td><td>pending</td></tr>
+</table>
+<h3>Result</h3>
+<p>Pending.</p>
+<h3>Notes</h3>
+<ul><li>This analysis uses compact saved vectors, not full token-level hidden states.</li><li>If flip and non-flip examples have similar aggregate cosine, inspect top-distance failure-flip cases qualitatively.</li><li>Next deeper analysis can collect full token activations for a small failure-flip subset only.</li></ul>
 </div>
 </details>
 </main>
