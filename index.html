@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TableVerse x Gemma 4 Experiment Log</title>
+  <style>
+:root {
+  color-scheme: light;
+  --ink: #1f2933;
+  --muted: #52606d;
+  --line: #d9e2ec;
+  --bg: #f8fafc;
+  --panel: #ffffff;
+  --accent: #0f766e;
+  --accent-soft: #d9f3ee;
+  --planned: #92400e;
+  --planned-soft: #fef3c7;
+}
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.5;
+}
+main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 40px 24px 72px;
+}
+h1 { margin: 0 0 8px; font-size: 34px; letter-spacing: 0; }
+h2 { margin: 34px 0 12px; font-size: 22px; }
+p { color: var(--muted); margin: 8px 0 0; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+}
+.metric { font-size: 28px; font-weight: 700; color: var(--accent); }
+.label {
+  color: var(--muted);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+details {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-top: 14px;
+  overflow: hidden;
+}
+summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  font-weight: 750;
+  list-style: none;
+}
+summary::-webkit-details-marker { display: none; }
+summary::after {
+  content: "+";
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #eef2f7;
+  color: var(--ink);
+  flex: 0 0 auto;
+}
+details[open] summary::after { content: "-"; }
+.body { padding: 0 16px 18px; border-top: 1px solid var(--line); }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  margin-top: 12px;
+}
+th, td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+th { background: #eef2f7; font-weight: 650; }
+code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 13px; }
+pre {
+  background: #102a43;
+  color: #e6f6ff;
+  border-radius: 8px;
+  padding: 14px;
+  overflow-x: auto;
+  margin: 12px 0 0;
+}
+.pill {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: #075e54;
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.planned { background: var(--planned-soft); color: var(--planned); }
+.summary-title { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+</style>
+</head>
+<body>
+<main>
+  <span class="pill">Generated experiment log</span>
+  <h1>TableVerse x Gemma 4</h1>
+  <p>Cross-format table QA and hidden-state geometry experiments.</p>
+  <section class="grid"><div class="card"><div class="label">Model</div><div class="metric">Gemma 4 12B</div><p><code>google/gemma-4-12B-it</code></p></div>
+<div class="card"><div class="label">Dataset</div><div class="metric">TableVerse QA</div><p><code>HTML / Markdown / LaTeX</code></p></div>
+<div class="card"><div class="label">Cluster</div><div class="metric">HAIC H100</div><p><code>80GB HBM3, BF16 enabled</code></p></div>
+<div class="card"><div class="label">Next Run</div><div class="metric">001</div><p><code>Full QA text benchmark</code></p></div></section>
+  <h2>Experiments</h2>
+  <details>
+<summary>
+<span class="summary-title">
+<span>000 Smoke QA Text Formats</span>
+<span class="pill">completed</span>
+</span>
+</summary>
+<div class="body">
+<p>Purpose: Verify the end-to-end TableVerse QA pipeline with Gemma 4 12B on a tiny text-format subset, including prediction output and selected hidden-state activation saving.</p>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Cluster</td><td><code>HAIC interactive GPU session</code></td></tr>
+<tr><td>Node</td><td><code>haic-hgx-4</code></td></tr>
+<tr><td>GPU</td><td><code>NVIDIA H100 80GB HBM3</code></td></tr>
+<tr><td>Project root</td><td><code>/hai/scratch/fangruih/tableverse_gemma/structure_data</code></td></tr>
+<tr><td>Conda env</td><td><code>/hai/scratch/fangruih/tableverse_gemma/conda_envs/tableverse-gemma</code></td></tr>
+<tr><td>PyTorch</td><td><code>2.6.0+cu124</code></td></tr>
+<tr><td>Dataset</td><td><code>MBZUAI/TABVERSE</code></td></tr>
+<tr><td>Dataset config</td><td><code>qa</code></td></tr>
+<tr><td>Split</td><td><code>test</code></td></tr>
+<tr><td>Model</td><td><code>google/gemma-4-12B-it</code></td></tr>
+<tr><td>Prompt format</td><td><code>tokenizer chat template</code></td></tr>
+<tr><td>Examples</td><td><code>5</code></td></tr>
+<tr><td>Formats</td><td><code>html_code, markdown_code, latex_code</code></td></tr>
+<tr><td>Total generations</td><td><code>15</code></td></tr>
+<tr><td>Decoding</td><td><code>deterministic, do_sample=false, max_new_tokens=32</code></td></tr>
+<tr><td>Activation policy</td><td><code>selected layers 0, 6, 13, 20, -1; final-token vector and mean-pooled vector</code></td></tr>
+</table>
+<h3>Command</h3>
+<pre>python experiments/tableverse_gemma/scripts/run_qa.py \
+  --config experiments/tableverse_gemma/configs/smoke.yaml</pre>
+<h3>Outputs</h3>
+<pre>experiments/tableverse_gemma/outputs/runs/smoke_text_5.jsonl
+experiments/tableverse_gemma/outputs/activations/smoke_text_5/</pre>
+<h3>Metrics</h3>
+<table><tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Total rows</td><td>15</td></tr>
+<tr><td>Runtime errors</td><td>0</td></tr>
+<tr><td>HTML accuracy</td><td>1.000</td></tr>
+<tr><td>Markdown accuracy</td><td>1.000</td></tr>
+<tr><td>LaTeX accuracy</td><td>1.000</td></tr>
+</table>
+<h3>Result</h3>
+<p>Smoke test passed. The run produced 15 prediction rows, 0 runtime errors, and activation files for every example-format pair.</p>
+<h3>Notes</h3>
+<ul><li>Initial exact scorer reported 0 accuracy because TableVerse labels are list-valued.</li><li>List-aware rescoring gives 15/15.</li><li>For final reporting, use or adapt the official TableVerse evaluator.</li></ul>
+</div>
+</details><details open>
+<summary>
+<span class="summary-title">
+<span>001 Full QA Text Benchmark</span>
+<span class="pill">completed</span>
+</span>
+</summary>
+<div class="body">
+<p>Purpose: Run Gemma 4 12B on the full TableVerse QA text benchmark across HTML, Markdown, and LaTeX, while saving compact selected-layer hidden-state vectors for cross-format representation analysis.</p>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Config</td><td><code>experiments/tableverse_gemma/configs/qa_full_text.yaml</code></td></tr>
+<tr><td>Run ID</td><td><code>qa_full_text_700</code></td></tr>
+<tr><td>Dataset</td><td><code>MBZUAI/TABVERSE</code></td></tr>
+<tr><td>Dataset config</td><td><code>qa</code></td></tr>
+<tr><td>Split</td><td><code>test</code></td></tr>
+<tr><td>Examples</td><td><code>700</code></td></tr>
+<tr><td>Formats</td><td><code>html_code, markdown_code, latex_code</code></td></tr>
+<tr><td>Total generations</td><td><code>2100</code></td></tr>
+<tr><td>Model</td><td><code>google/gemma-4-12B-it</code></td></tr>
+<tr><td>Prompt format</td><td><code>tokenizer chat template</code></td></tr>
+<tr><td>Decoding</td><td><code>deterministic, do_sample=false, max_new_tokens=32</code></td></tr>
+<tr><td>Activation policy</td><td><code>selected layers 0, 6, 13, 20, -1; final-token vector and mean-pooled vector</code></td></tr>
+</table>
+<h3>Command</h3>
+<pre>python experiments/tableverse_gemma/scripts/run_qa.py \
+  --config experiments/tableverse_gemma/configs/qa_full_text.yaml</pre>
+<h3>Post-run Summary Command</h3>
+<pre>python experiments/tableverse_gemma/scripts/behavior_summary.py \
+  experiments/tableverse_gemma/outputs/runs/qa_full_text_700.jsonl \
+  --out experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_behavior.md</pre>
+<h3>Outputs</h3>
+<pre>experiments/tableverse_gemma/outputs/runs/qa_full_text_700.jsonl
+experiments/tableverse_gemma/outputs/activations/qa_full_text_700/
+experiments/tableverse_gemma/outputs/metrics/qa_full_text_700_behavior.md</pre>
+<h3>Metrics</h3>
+<table><tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Total rows</td><td>2100</td></tr>
+<tr><td>Examples</td><td>700</td></tr>
+<tr><td>Runtime</td><td>20:49</td></tr>
+<tr><td>Runtime errors</td><td>3</td></tr>
+<tr><td>HTML accuracy</td><td>0.431</td></tr>
+<tr><td>HTML correct</td><td>302 / 700</td></tr>
+<tr><td>Markdown accuracy</td><td>0.430</td></tr>
+<tr><td>Markdown correct</td><td>301 / 700</td></tr>
+<tr><td>LaTeX accuracy</td><td>0.433</td></tr>
+<tr><td>LaTeX correct</td><td>303 / 700</td></tr>
+<tr><td>Failure-flip examples</td><td>77</td></tr>
+<tr><td>Activation files</td><td>2097</td></tr>
+<tr><td>Activation directory size</td><td>563M</td></tr>
+<tr><td>Avg HTML tokens</td><td>1810.6</td></tr>
+<tr><td>Avg Markdown tokens</td><td>933.9</td></tr>
+<tr><td>Avg LaTeX tokens</td><td>861.6</td></tr>
+</table>
+<h3>Result</h3>
+<p>Full text QA benchmark completed in 20:49. The run produced 2100 JSONL rows for 700 examples x 3 formats. Accuracy is very similar across HTML, Markdown, and LaTeX, but 77 examples show at least one cross-format correct/incorrect disagreement. Activation files total 2097 because three rows had runtime errors and therefore did not save activations.</p>
+<h3>Notes</h3>
+<ul><li>PIL emitted a DecompressionBombWarning for a very large TableVerse image field, but this run used text fields only.</li><li>HTML had 1 error, Markdown had 2 errors, and LaTeX had 0 errors.</li><li>The 2097 activation files match 2100 rows minus 3 runtime-error rows.</li><li>Similar aggregate accuracy across formats means the next analysis should focus on the 77 failure-flip examples and layer-wise representation geometry.</li><li>Full token-level activations should be collected only for later diagnostic subsets.</li></ul>
+</div>
+</details>
+</main>
+</body>
+</html>
